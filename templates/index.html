@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <title>FNaF vs Toy Story</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <div id="start-screen" class="overlay">
+    <section class="selector-panel">
+      <h1>FNAF <span>VS</span> TOYSTORY</h1>
+      <div class="selector">
+        <label>Bando / Personaje
+          <select id="character-select">
+            <option value="freddy">Freddy Fazbear - FNaF</option>
+            <option value="bonnie">Bonnie - FNaF</option>
+            <option value="chica">Chica - FNaF</option>
+            <option value="foxy">Foxy - FNaF</option>
+            <option value="buzz">Buzz Lightyear - Toy Story</option>
+            <option value="woody">Sheriff Woody - Toy Story</option>
+            <option value="alien">Alien Pizza Planeta - Toy Story</option>
+            <option value="jessie">Jessie - Toy Story</option>
+            <option value="bullseye">Tiro al Blanco - Toy Story</option>
+          </select>
+        </label>
+        <label>Modo
+          <select id="mode-select">
+            <option value="mission">Misiones Historia</option>
+            <option value="pvp">Batalla PvP / Arena</option>
+          </select>
+        </label>
+      </div>
+      <button id="start-button" class="primary">ENTRAR A LA MEGA PIZZERÍA</button>
+    </section>
+  </div>
+
+  <main id="game">
+    <canvas id="arena"></canvas>
+    <header class="top-hud">
+      <div><span>VIDA</span><b id="health">100</b></div>
+      <div><span>ESCUDO</span><b id="shield">100</b></div>
+      <div><span>ARMA</span><b id="weapon-name">PUÑETAZO</b></div>
+      <div><span>MUNICIÓN</span><b id="ammo">∞</b></div>
+      <div class="mission">MISIÓN <b id="mission">1</b><small id="mission-text">Sabotaje eléctrico</small></div>
+    </header>
+    <canvas id="radar" width="150" height="150"></canvas>
+    <div id="enemy-alert" aria-live="polite"></div>
+    <div id="notice" role="status"></div>
+
+    <div id="move-pad" class="move-pad">
+      <div id="joystick-base" class="joystick-base"><div id="joystick-stick"></div></div>
+      <div id="dpad" class="dpad">
+        <button data-dir="forward">▲</button><button data-dir="left">◄</button>
+        <button data-dir="back">▼</button><button data-dir="right">►</button>
+      </div>
+    </div>
+    <div class="action-pad">
+      <button id="melee" data-action="melee">PUÑETAZO</button>
+      <button id="shoot" data-action="shoot" class="danger">DISPARAR</button>
+      <button id="weapon" data-action="weapon">ARMA</button>
+      <button id="xray" data-action="xray">RAYOS X</button>
+      <button id="jump" data-action="jump">SALTAR</button>
+      <button id="sprint" data-action="sprint">CORRER</button>
+      <button id="reload" data-action="reload">RECARGAR</button>
+    </div>
+    <button id="control-toggle" class="control-toggle">CONTROL: JOYSTICK</button>
+  </main>
+
+  <script src="/static/js/three.min.js"></script>
+  <script src="/static/js/characters.js"></script>
+  <script src="/static/js/game.js"></script>
+</body>
+</html>
