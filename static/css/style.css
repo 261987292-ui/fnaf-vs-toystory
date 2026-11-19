@@ -42,6 +42,14 @@ body {
 
 .overlay.hidden { display:none; }
 
+.menu-status {
+  min-height:22px;
+  margin:-8px 0 10px;
+  color:#9fdcff;
+  font-size:12px;
+  pointer-events:none;
+}
+
 .selector-panel {
   width:min(620px,calc(100% - 28px));
   padding:22px;
