@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#120808">
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="icon" href="/static/icons/icon.svg" type="image/svg+xml">
   <title>FNaF vs Toy Story</title>
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
@@ -33,6 +36,7 @@
         </label>
       </div>
       <button id="start-button" class="primary">ENTRAR A LA MEGA PIZZERÍA</button>
+      <button id="install-app" class="primary install-app" type="button" hidden>INSTALAR APP</button>
     </section>
   </div>
 
@@ -75,5 +79,31 @@
   <script src="/static/js/characters.js"></script>
   <script src="/static/js/audio.js"></script>
   <script src="/static/js/game.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/static/sw.js").catch(function () {});
+      });
+    }
+    var installPrompt=null;
+    window.addEventListener("beforeinstallprompt", function (event) {
+      event.preventDefault();
+      installPrompt=event;
+      var installButton=document.getElementById("install-app");
+      if (installButton) installButton.hidden=false;
+    });
+    document.addEventListener("DOMContentLoaded", function () {
+      var installButton=document.getElementById("install-app");
+      if (!installButton) return;
+      installButton.addEventListener("click", function () {
+        if (!installPrompt) return;
+        installPrompt.prompt();
+        installPrompt.userChoice.finally(function () {
+          installPrompt=null;
+          installButton.hidden=true;
+        });
+      });
+    });
+  </script>
 </body>
 </html>

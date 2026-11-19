@@ -93,6 +93,7 @@ body {
   cursor:pointer;
   touch-action:none;
 }
+.install-app { margin-top:8px; border-color:#69e4ff; background:linear-gradient(#1c5261,#17202b); }
 
 #arena { display:block; }
 

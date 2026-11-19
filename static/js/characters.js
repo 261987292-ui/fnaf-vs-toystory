@@ -1,6 +1,20 @@
 (function (global) {
   "use strict";
 
+  global.createCapsuleMesh = function (radius, length, material) {
+    var group = new THREE.Group();
+    var cylinder = new THREE.Mesh(
+      new THREE.CylinderGeometry(radius, radius, length, 8, 4, false),
+      material
+    );
+    var top = new THREE.Mesh(new THREE.SphereGeometry(radius, 8, 6), material);
+    var bottom = new THREE.Mesh(new THREE.SphereGeometry(radius, 8, 6), material);
+    top.position.y = length / 2;
+    bottom.position.y = -length / 2;
+    group.add(cylinder, top, bottom);
+    return group;
+  };
+
   if (!THREE.CapsuleGeometry) {
     THREE.CapsuleGeometry = function (radius, length, radialSegments) {
       return new THREE.CylinderGeometry(radius, radius, length, radialSegments || 8);
@@ -169,4 +183,5 @@
     };return model;},
     names:Object.keys(factories)
   };
+  global.createCharacterMesh=global.CharacterFactory.create;
 })(window);

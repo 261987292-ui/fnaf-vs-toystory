@@ -1,0 +1,67 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - run: npm install
+
+      - name: Add Android platform if missing
+        run: |
+          if [ ! -d "android" ]; then npx cap add android; fi
+
+      - run: npx cap sync android
+
+      - name: Configure Android manifest
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          p = Path("android/app/src/main/AndroidManifest.xml")
+          text = p.read_text()
+          if "android.permission.VIBRATE" not in text:
+              pos = text.find("<application")
+              text = text[:pos] + '    <uses-permission android:name="android.permission.VIBRATE" />\n\n' + text[pos:]
+          text = text.replace('android:screenOrientation="unspecified"', 'android:screenOrientation="landscape"')
+          if "<activity" in text and 'android:screenOrientation="landscape"' not in text:
+              text = text.replace("<activity", '<activity android:screenOrientation="landscape"', 1)
+          p.write_text(text)
+          PY
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      - name: Prepare artifact name
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk FNaF-vs-ToyStory-3D.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FNaF-vs-ToyStory-3D
+          path: FNaF-vs-ToyStory-3D.apk
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: FNaF vs Toy Story 3D - Latest
+          files: FNaF-vs-ToyStory-3D.apk

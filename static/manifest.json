@@ -1,0 +1,19 @@
+{
+  "name": "FNaF vs Toy Story 3D",
+  "short_name": "FNaF vs TS",
+  "description": "Mega pizzería voxel 3D con misiones y batalla PvP.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "theme_color": "#120808",
+  "background_color": "#09090d",
+  "icons": [
+    {
+      "src": "/static/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
