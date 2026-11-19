@@ -38,12 +38,16 @@
 
   <main id="game">
     <canvas id="arena"></canvas>
+    <div id="damage-flash"></div>
+    <div id="crosshair" aria-hidden="true">+</div>
     <header class="top-hud">
       <div><span>VIDA</span><b id="health">100</b></div>
       <div><span>ESCUDO</span><b id="shield">100</b></div>
       <div><span>ARMA</span><b id="weapon-name">PUÑETAZO</b></div>
       <div><span>MUNICIÓN</span><b id="ammo">∞</b></div>
       <div class="mission">MISIÓN <b id="mission">1</b><small id="mission-text">Sabotaje eléctrico</small></div>
+      <button id="control-toggle" class="control-toggle">CONTROL: JOYSTICK</button>
+      <button id="sound-toggle" class="control-toggle">SONIDO: ON</button>
     </header>
     <canvas id="radar" width="150" height="150"></canvas>
     <div id="enemy-alert" aria-live="polite"></div>
@@ -65,11 +69,11 @@
       <button id="sprint" data-action="sprint">CORRER</button>
       <button id="reload" data-action="reload">RECARGAR</button>
     </div>
-    <button id="control-toggle" class="control-toggle">CONTROL: JOYSTICK</button>
   </main>
 
   <script src="/static/js/three.min.js"></script>
   <script src="/static/js/characters.js"></script>
+  <script src="/static/js/audio.js"></script>
   <script src="/static/js/game.js"></script>
 </body>
 </html>

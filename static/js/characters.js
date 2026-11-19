@@ -2,182 +2,171 @@
   "use strict";
 
   if (!THREE.CapsuleGeometry) {
-    THREE.CapsuleGeometry = function (radius, length, capSegments, radialSegments) {
-      return new THREE.CylinderGeometry(
-        radius,
-        radius,
-        length,
-        radialSegments || 8,
-        capSegments || 4,
-        false
-      );
+    THREE.CapsuleGeometry = function (radius, length, radialSegments) {
+      return new THREE.CylinderGeometry(radius, radius, length, radialSegments || 8);
     };
   }
 
-  global.createCapsuleMesh = function (radius, length, material) {
-    var group = new THREE.Group();
-    var cylinder = new THREE.Mesh(
-      new THREE.CylinderGeometry(radius, radius, length, 8, 4, false),
-      material
-    );
-    cylinder.position.y = 0;
-    group.add(cylinder);
-
-    var top = new THREE.Mesh(new THREE.SphereGeometry(radius, 8, 6), material);
-    top.position.y = length / 2;
-    group.add(top);
-
-    var bottom = new THREE.Mesh(new THREE.SphereGeometry(radius, 8, 6), material);
-    bottom.position.y = -length / 2;
-    group.add(bottom);
-
-    group.userData.capsulePart = true;
-    return group;
-  };
-
   function mat(color, roughness) {
-    return new THREE.MeshStandardMaterial({
-      color: color,
-      roughness: roughness == null ? 0.62 : roughness,
-      metalness: 0.03
-    });
+    return new THREE.MeshStandardMaterial({color:color, roughness:roughness == null ? 0.65 : roughness, metalness:.04});
   }
-
-  function block(group, size, position, material) {
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(size[0], size[1], size[2]), material);
-    mesh.position.set(position[0], position[1], position[2]);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    group.add(mesh);
+  function block(parent,size,pos,material,cast) {
+    var mesh=new THREE.Mesh(new THREE.BoxGeometry(size[0],size[1],size[2]),material);
+    mesh.position.set(pos[0],pos[1],pos[2]);
+    mesh.castShadow=cast !== false;
+    parent.add(mesh);
     return mesh;
   }
-
-  function sphere(group, radius, position, material) {
-    const mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 10, 8), material);
-    mesh.position.set(position[0], position[1], position[2]);
-    mesh.castShadow = true;
-    group.add(mesh);
+  function sphere(parent,radius,pos,material) {
+    var mesh=new THREE.Mesh(new THREE.SphereGeometry(radius,10,8),material);
+    mesh.position.set(pos[0],pos[1],pos[2]);
+    mesh.castShadow=true;
+    parent.add(mesh);
     return mesh;
   }
+  function cylinder(parent,radiusTop,radiusBottom,height,pos,material) {
+    var mesh=new THREE.Mesh(new THREE.CylinderGeometry(radiusTop,radiusBottom,height,10),material);
+    mesh.position.set(pos[0],pos[1],pos[2]);
+    mesh.castShadow=true;
+    parent.add(mesh);
+    return mesh;
+  }
+  function nameSprite(name) {
+    var canvas=document.createElement("canvas");
+    canvas.width=256;canvas.height=64;
+    var ctx=canvas.getContext("2d");
+    ctx.fillStyle="rgba(10,10,16,.78)";
+    ctx.fillRect(4,8,248,48);
+    ctx.strokeStyle="#eab866";ctx.strokeRect(5,9,246,46);
+    ctx.fillStyle="#fff4dc";ctx.font="bold 26px monospace";ctx.textAlign="center";
+    ctx.fillText(name,128,42);
+    var texture=new THREE.CanvasTexture(canvas);
+    var sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:texture,transparent:true,depthTest:false}));
+    sprite.scale.set(1.8,.45,1);sprite.position.y=3.05;
+    return sprite;
+  }
 
-  function baseBody(name, bodyColor, accentColor) {
-    const g = new THREE.Group();
-    g.name = name;
-    g.userData.parts = {};
-    block(g, [1.12, 1.38, 0.72], [0, 1.62, 0], mat(bodyColor));
-    block(g, [0.90, 0.78, 0.82], [0, 2.64, 0], mat(bodyColor));
-    g.userData.parts.leftArm = block(g, [0.34, 1.24, 0.34], [-0.74, 1.62, 0], mat(accentColor));
-    g.userData.parts.rightArm = block(g, [0.34, 1.24, 0.34], [0.74, 1.62, 0], mat(accentColor));
-    g.userData.parts.leftLeg = block(g, [0.40, 1.05, 0.42], [-0.34, 0.52, 0], mat(accentColor));
-    g.userData.parts.rightLeg = block(g, [0.40, 1.05, 0.42], [0.34, 0.52, 0], mat(accentColor));
-    g.userData.parts.head = g.children[1];
-    g.userData.parts.eyes = [];
-    [-0.24, 0.24].forEach(function (x) {
-      const eye = sphere(g, 0.09, [x, 2.69, 0.43], new THREE.MeshBasicMaterial({color:0x58d9ff}));
-      g.userData.parts.eyes.push(eye);
+  function humanoid(name,bodyColor,accentColor) {
+    var g=new THREE.Group();g.name=name;
+    g.userData.parts={};
+    g.userData.parts.leftLeg=block(g,[.38,.82,.42],[-.32,.41,0],mat(accentColor));
+    g.userData.parts.rightLeg=block(g,[.38,.82,.42],[.32,.41,0],mat(accentColor));
+    block(g,[.42,.18,.48],[-.32,.06,.04],mat(0x17130f));
+    block(g,[.42,.18,.48],[.32,.06,.04],mat(0x17130f));
+    g.userData.parts.leftArm=block(g,[.30,1.05,.32],[-.74,1.42,0],mat(accentColor));
+    g.userData.parts.rightArm=block(g,[.30,1.05,.32],[.74,1.42,0],mat(accentColor));
+    block(g,[1.08,1.18,.68],[0,1.42,0],mat(bodyColor));
+    var head=new THREE.Group();head.position.set(0,2.18,0);g.add(head);g.userData.parts.head=head;
+    sphere(head,.48,[0,0,0],mat(bodyColor));
+    [-.18,.18].forEach(function(x){var eye=sphere(head,.075,[x,.08,.43],new THREE.MeshBasicMaterial({color:0x4ddcff}));eye.userData.pupil=true;});
+    g.userData.parts.eyes=head.children.filter(function(c){return c.userData.pupil;});
+    g.userData.parts.jaw=block(head,[.62,.18,.22],[0,-.30,.34],mat(0xb98a63));
+    g.add(nameSprite(name));
+    g.userData.name=name;
+    return g;
+  }
+
+  function freddy(){
+    var g=humanoid("Freddy",0x65412a,0x38241b);
+    g.userData.parts.head.scale.set(1.08,1.02,1);
+    sphere(g.userData.parts.head,.16,[0,-.12,.50],mat(0xd9ad82));
+    sphere(g.userData.parts.head,.09,[0,-.02,.64],mat(0x090909));
+    [-.42,.42].forEach(function(x){sphere(g.userData.parts.head,.16,[x,.43,0],mat(0x65412a));});
+    cylinder(g,.38,.38,.12,[0,.58,0],mat(0x151515));
+    cylinder(g,.25,.25,.42,[0,.79,0],mat(0x151515));
+    block(g,[.42,.11,.12],[0,1.92,.38],mat(0x111111));
+    block(g.userData.parts.rightArm,[.10,.62,.10],[.10,-.12,.38],mat(0xaab8c1,.25));
+    g.userData.special="toreador";g.userData.skillName="Marcha del Toreador";
+    return g;
+  }
+
+  function buzz(){
+    var g=humanoid("Buzz",0xecebe3,0x78ba35);
+    block(g,[.62,.48,.14],[0,1.72,.36],mat(0x73b9d1));
+    block(g,[.78,.10,.12],[0,1.38,.38],mat(0x6a3baa));
+    [-.76,.76].forEach(function(x){
+      var wing=block(g,[.12,1.05,.62],[x,1.82,-.28],mat(0xeeeae0));wing.rotation.z=x>0?-0.20:.20;
     });
-    g.scale.setScalar(0.72);
+    var helmet=sphere(g,.62,[0,2.18,.02],new THREE.MeshBasicMaterial({color:0x80aaff,transparent:true,opacity:.32,side:THREE.DoubleSide}));
+    helmet.scale.z=.72;
+    block(g.userData.parts.rightArm,[.22,.22,.52],[0,-.10,.38],new THREE.MeshBasicMaterial({color:0xff3148}));
+    g.userData.special="helmet";g.userData.skillName="Alas y láser";
     return g;
   }
 
-  function freddy() {
-    const g = baseBody("Freddy", 0x5b3822, 0x3a2417);
-    block(g, [0.62, 0.42, 0.16], [0, 2.47, 0.43], mat(0x8b6548));
-    block(g, [0.48, 0.12, 0.18], [0, 1.94, 0.40], mat(0x111111));
-    block(g, [0.82, 0.13, 0.82], [0, 3.22, 0], mat(0x151515));
-    block(g, [0.52, 0.48, 0.52], [0, 3.04, 0], mat(0x151515));
-    [-0.38,0.38].forEach(function (x) {
-      sphere(g, 0.13, [x,3.38,0], mat(0x5b3822));
+  function woody(){
+    var g=humanoid("Woody",0xe7cf85,0x69acd0);
+    block(g,[1.02,.12,1.02],[0,2.76,0],mat(0xc88b3d));
+    cylinder(g,.48,.48,.38,[0,2.94,0],mat(0xc88b3d));
+    block(g,[1.12,.52,.08],[0,1.45,.38],mat(0x50382c));
+    block(g,[.28,.28,.10],[.48,1.48,.44],mat(0xe0b94c));
+    block(g,[.58,.10,.12],[0,1.88,.40],mat(0xc83232));
+    g.userData.special="lasso";g.userData.skillName="Cuerda del Sheriff";
+    return g;
+  }
+
+  function alien(){
+    var g=humanoid("Alien",0x69d66a,0x3f77ba);
+    var head=g.userData.parts.head;
+    [-.30,0,.30].forEach(function(x){sphere(head,.09,[x,.10,.44],new THREE.MeshBasicMaterial({color:0x7cfaff}));});
+    cylinder(g,.045,.045,.58,[0,2.93,0],mat(0x69d66a));
+    sphere(g,.09,[0,3.22,0],new THREE.MeshBasicMaterial({color:0x69d66a}));
+    block(g,[.70,.12,.12],[0,1.48,.38],mat(0x6aabef));
+    cylinder(g,.18,.18,.08,[0,1.70,.42],mat(0xf1c52f));
+    g.userData.special="claw";g.userData.skillName="La Garra";
+    return g;
+  }
+
+  function jessie(){
+    var g=humanoid("Jessie",0xf1df9a,0x4b2c25);
+    block(g,[1.02,.12,1.02],[0,2.72,0],mat(0xc52b27));
+    cylinder(g,.48,.48,.36,[0,2.90,0],mat(0xd49a57));
+    block(g,[.60,.52,.12],[0,1.55,.38],mat(0xf3eee0));
+    block(g,[.20,.86,.12],[-.52,1.20,.38],mat(0x3b54b4));
+    block(g,[.20,.86,.12],[.52,1.20,.38],mat(0x3b54b4));
+    cylinder(g,.055,.055,1.05,[.46,2.10,-.38],mat(0xb52f25));
+    g.userData.special="speed";g.userData.skillName="Velocidad vaquera";
+    return g;
+  }
+
+  function bullseye(){
+    var g=new THREE.Group();g.name="Bullseye";g.userData.parts={};
+    block(g,[1.45,.74,.58],[0,1.08,0],mat(0x94623c));
+    block(g,[.62,.56,.60],[.82,1.58,0],mat(0x7a4d2f));
+    sphere(g,.38,[1.02,1.86,0],mat(0x94623c));
+    sphere(g,.12,[1.18,1.90,.33],mat(0x29180f));
+    [-.50,.50].forEach(function(x){
+      [-.22,.22].forEach(function(z){
+        var leg=block(g,[.24,.82,.24],[x,.41,z],mat(0x7a4d2f));if(z<0)g.userData.parts.leftLeg=leg;else g.userData.parts.rightLeg=leg;
+        block(g,[.28,.16,.30],[x,.06,z],mat(0x151515));
+      });
     });
-    const mic = block(g, [0.10,0.58,0.10], [0.84,1.05,0.35], mat(0x9ba3a8,0.25));
-    g.userData.special = "toreador";
-    g.userData.skillName = "Marcha del Toreador";
-    g.userData.parts.weapon = mic;
+    block(g,[.78,.12,.76],[0,1.48,0],mat(0x6e3b25));
+    g.userData.parts.head=g.children[2];
+    g.userData.parts.eyes=[];
+    g.add(nameSprite("Bullseye"));
+    g.userData.special="charge";g.userData.skillName="Embestida";
+    g.scale.setScalar(.92);
     return g;
   }
 
-  function buzz() {
-    const g = baseBody("Buzz", 0xf1eee2, 0x73b62d);
-    block(g, [0.48,0.58,0.12], [0,2.38,0.43], mat(0x75b9d1));
-    block(g, [0.74,0.10,0.12], [0,1.70,0.42], mat(0x7a4ac3));
-    block(g, [0.46,0.14,0.10], [0.96,1.55,0.42], mat(0x92ef22));
-    [-1,1].forEach(function (side) {
-      block(g, [0.10,1.18,0.54], [side*0.72,2.10,-0.18], mat(0xe7e7e2));
-    });
-    const laser = block(g, [0.18,0.18,0.50], [0.82,1.55,0.52], new THREE.MeshBasicMaterial({color:0x69ff79}));
-    g.userData.special = "helmet";
-    g.userData.skillName = "Alas y láser";
-    g.userData.parts.weapon = laser;
-    return g;
-  }
-
-  function woody() {
-    const g = baseBody("Woody", 0xead9a7, 0x8bd3e6);
-    block(g, [0.90,0.68,0.18], [0,1.70,0.40], mat(0x4c3324));
-    block(g, [0.34,0.10,0.12], [0,2.36,0.43], mat(0xf0c36b));
-    block(g, [0.95,0.12,0.95], [0,3.15,0], mat(0xd69a42));
-    block(g, [0.58,0.44,0.58], [0,3.02,0], mat(0xd69a42));
-    const star = block(g, [0.22,0.22,0.06], [0.46,1.72,0.51], mat(0xe6c84c));
-    g.userData.special = "lasso";
-    g.userData.skillName = "Cuerda del Sheriff";
-    g.userData.parts.weapon = star;
-    return g;
-  }
-
-  function alien() {
-    const g = baseBody("Alien", 0x70d06b, 0x4e79b8);
-    block(g, [0.78,0.12,0.74], [0,2.98,0], mat(0x55a7d7));
-    [-0.28,0,0.28].forEach(function (x) {
-      sphere(g, 0.075, [x,2.72,0.43], new THREE.MeshBasicMaterial({color:0x2ce5ff}));
-    });
-    const claw = block(g, [0.10,0.58,0.10], [0.86,1.12,0.30], mat(0x77ffaf));
-    g.userData.special = "claw";
-    g.userData.skillName = "La Garra";
-    g.userData.parts.weapon = claw;
-    return g;
-  }
-
-  function jessie() {
-    const g = baseBody("Jessie", 0xf1e4a3, 0x4f2a1e);
-    block(g, [0.96,0.12,0.96], [0,3.12,0], mat(0xbf2525));
-    block(g, [0.58,0.42,0.58], [0,3.00,0], mat(0xd59b54));
-    block(g, [0.55,0.10,0.10], [0,1.75,0.43], mat(0xe7dfb4));
-    [-0.25,0.25].forEach(function (x) {
-      block(g, [0.12,0.74,0.12], [x,3.18,0.12], mat(0xa52c20));
-    });
-    g.userData.special = "speed";
-    g.userData.skillName = "Velocidad vaquera";
-    return g;
-  }
-
-  function bullseye() {
-    const g = new THREE.Group();
-    g.name = "Bullseye";
-    g.userData.parts = {};
-    block(g, [1.45,0.70,0.58], [0,1.15,0], mat(0x8a5a35));
-    block(g, [0.58,0.62,0.62], [0.78,1.68,0], mat(0x6f472a));
-    [-0.50,0.50].forEach(function (x) {
-      g.userData.parts.leftLeg = block(g, [0.24,0.82,0.24], [x,0.42,-0.18], mat(0x9a744d));
-      g.userData.parts.rightLeg = block(g, [0.24,0.82,0.24], [x,0.42,0.18], mat(0x9a744d));
-    });
-    block(g, [0.76,0.12,0.72], [0,1.62,0], mat(0x263b70));
-    g.userData.special = "charge";
-    g.userData.skillName = "Embestida";
-    g.scale.setScalar(0.72);
-    return g;
-  }
-
-  const factories = {freddy, buzz, woody, alien, jessie, bullseye,
-    bonnie:function(){const g=baseBody("Bonnie",0x6658a4,0x4d407d);block(g,[0.18,1.18,0.18],[0.30,3.40,0],mat(0x6658a4));block(g,[0.18,1.18,0.18],[-0.30,3.40,0],mat(0x6658a4));block(g,[0.44,0.12,0.14],[0,1.92,0.40],mat(0xd34a4a));g.userData.special="guitar";return g;},
-    chica:function(){const g=baseBody("Chica",0xf2c94c,0xe49a32);block(g,[0.74,0.58,0.08],[0,1.58,0.40],mat(0xfff5dc));g.userData.special="cupcake";return g;},
-    foxy:function(){const g=baseBody("Foxy",0xa83232,0x70201f);block(g,[0.32,0.32,0.32],[0.40,2.74,0.42],mat(0x171717));g.userData.special="hook";return g;}
+  var factories={
+    freddy:freddy,buzz:buzz,woody:woody,alien:alien,jessie:jessie,bullseye:bullseye,
+    bonnie:function(){var g=humanoid("Bonnie",0x6658a4,0x4d407d);[-.27,.27].forEach(function(x){cylinder(g,.10,.10,.95,[x,2.85,0],mat(0x6658a4));});g.userData.special="guitar";return g;},
+    chica:function(){var g=humanoid("Chica",0xf2c94c,0xe49a32);block(g,[.74,.58,.08],[0,1.58,.38],mat(0xfff5dc));g.userData.special="cupcake";return g;},
+    foxy:function(){var g=humanoid("Foxy",0xa83232,0x70201f);sphere(g,.30,[.38,2.70,.42],mat(0x171717));g.userData.special="hook";return g;}
   };
 
-  global.CharacterFactory = {
-    create: function (name) {
-      const factory = factories[name] || freddy;
-      return factory();
-    },
-    names: Object.keys(factories)
+  global.CharacterFactory={
+    create:function(name){var factory=factories[name]||freddy;var model=factory();model.userData.animate=function(time){
+      var p=model.userData.parts;if(!p)return;
+      var swing=Math.sin(time*8)*.28;
+      if(p.leftArm)p.leftArm.rotation.x=swing;
+      if(p.rightArm)p.rightArm.rotation.x=-swing;
+      if(p.leftLeg)p.leftLeg.rotation.x=-swing;
+      if(p.rightLeg)p.rightLeg.rotation.x=swing;
+      if(p.head)p.head.rotation.y=Math.sin(time*1.3)*.12;
+    };return model;},
+    names:Object.keys(factories)
   };
 })(window);
