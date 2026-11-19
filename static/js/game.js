@@ -185,7 +185,7 @@
 
       function addCapsule(x,z){
         var group=new THREE.Group();
-        var body=new THREE.Mesh(new THREE.CapsuleGeometry(.38,.55,4,8),new THREE.MeshStandardMaterial({color:0x65a9ff,emissive:0x173466,roughness:.35}));
+        var body=createCapsuleMesh(.38,.55,new THREE.MeshStandardMaterial({color:0x65a9ff,emissive:0x173466,roughness:.35}));
         body.position.y=.85;group.add(body);
         var light=new THREE.PointLight(0x69e4ff,.9,4);light.position.y=.9;group.add(light);
         group.position.set(x,0,z);scene.add(group);capsules.push({group:group,active:true});
